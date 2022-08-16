@@ -2,4 +2,5 @@ black
 pytest
 pytest-mock
 pytest-cov
+pytest-timeout
 freezegun

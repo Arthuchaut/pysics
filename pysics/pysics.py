@@ -1,7 +1,7 @@
 from time import time
 from typing import Final, Optional
 import glfw
-from pysics.types import ByteInt, Color, Duration, Timestamp
+from pysics.types import ByteInt, Color, DrawCallback, Duration, Timestamp
 from pysics._wrappers import (
     _GLFWWrapper,
     _GLWrapper,
@@ -122,6 +122,42 @@ class Pysics:
 
         self.canvas = Canvas(width, height, fill=fill)
         return self.canvas
+
+    def run_loop(self, callback: DrawCallback) -> None:
+        """Loop through the render process 'til the window close event is triggered.
+
+        Notice that the window rendering is depending of:
+            - The _loop attribute which must be True;
+            - The timer that blocks the rendering during the time of the _delay.
+
+        Also notice that the event listener is not blocked by these mechanisms.
+
+        Args:
+            callback: The drawing function which will be called at each iteration.
+
+        Raises:
+            RuntimeError: If the canvas is not initialized.
+        """
+
+        if not isinstance(self.canvas, Canvas):
+            raise RuntimeError(
+                "The canvas must be initialized. You should use the create_canvas() "
+                "method or pass a canvas to the constructor instead."
+            )
+
+        self._loop = True
+        self._reset_timer()
+
+        while not _GLFWWrapper.window_should_close(self.canvas._window):
+            if self._loop and self._time_elapsed():
+                self.canvas._clear_window()
+                callback()
+                self.canvas._swap_buffers()
+                self._reset_timer()
+
+            _GLFWWrapper.poll_events()
+
+        _GLFWWrapper.terminate()
 
     def _reset_timer(self) -> None:
         """Reset the reference timestamp for the timer."""

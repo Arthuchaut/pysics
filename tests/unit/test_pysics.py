@@ -1,6 +1,7 @@
 from datetime import datetime
 from time import time
-from typing import Any, Callable
+from turtle import width
+from typing import Any, Callable, ClassVar
 from unittest.mock import ANY, MagicMock
 import pytest
 import glfw
@@ -142,6 +143,9 @@ class TestCanvas:
 
 @pytest.mark.unit
 class TestPysics:
+    _LOOP_ITERATION: ClassVar[int] = 0
+    _CALLBACK_ITERATION: ClassVar[int] = 0
+
     class _FakeCanvas:
         ...
 
@@ -238,3 +242,60 @@ class TestPysics:
         engine._delay = delay
         engine._reset_timer()
         assert engine._time_elapsed() == expected
+
+    @pytest.mark.parametrize(
+        "with_canvas, loop_iterations, loop_stop, throwable",
+        [
+            (True, 5, 5, None),
+            (True, 5, 2, None),
+            (False, 0, 0, RuntimeError),
+        ],
+    )
+    def test_run_loop(
+        self,
+        with_canvas: bool,
+        loop_iterations: int,
+        loop_stop: int,
+        throwable: type[RuntimeError] | None,
+        mocker: MockerFixture,
+    ) -> None:
+        self._LOOP_ITERATION = 0
+        self._CALLBACK_ITERATION = 0
+        canvas: Canvas | None = None
+
+        def fake_callback() -> None:
+            self._CALLBACK_ITERATION += 1
+
+            if self._CALLBACK_ITERATION >= loop_stop:
+                engine._loop = False
+
+        def poll_events_patch():
+            self._LOOP_ITERATION += 1
+
+        if with_canvas:
+            mocker.patch.object(Canvas, "_init_window")
+            clear_mock: MagicMock = mocker.patch.object(Canvas, "_clear_window")
+            swap_mock: MagicMock = mocker.patch.object(Canvas, "_swap_buffers")
+            canvas = Canvas(200, 200)
+
+        mocker.patch.object(_GLFWWrapper, "poll_events", poll_events_patch)
+        glfw_pe_spy: MagicMock = mocker.spy(_GLFWWrapper, "poll_events")
+        glfw_term_mock: MagicMock = mocker.patch.object(_GLFWWrapper, "terminate")
+        mocker.patch.object(
+            _GLFWWrapper,
+            "window_should_close",
+            lambda _: self._LOOP_ITERATION >= loop_iterations,
+        )
+        engine: Pysics = Pysics(canvas)
+
+        if throwable:
+            with pytest.raises(throwable):
+                engine.run_loop(fake_callback)
+        else:
+            engine.run_loop(fake_callback)
+            clear_mock.call_count == loop_stop
+            swap_mock.call_count == loop_stop
+            glfw_pe_spy.call_count == loop_iterations
+            glfw_term_mock.assert_called_once()
+            assert self._CALLBACK_ITERATION == loop_stop
+            assert self._LOOP_ITERATION == loop_iterations
