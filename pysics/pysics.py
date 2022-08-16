@@ -1,7 +1,14 @@
 from typing import Final, Optional
 import glfw
 from pysics.types import ByteInt, Color
-from pysics._wrappers import _GLFWWrapper
+from pysics._wrappers import (
+    _GLFWWrapper,
+    _GLWrapper,
+    GL_COLOR_BUFFER_BIT,
+    GL_DEPTH_BUFFER_BIT,
+    GL_PROJECTION,
+    GL_MODELVIEW,
+)
 
 
 class Canvas:
@@ -55,6 +62,21 @@ class Canvas:
 
         self.width, self.height = _GLFWWrapper.get_frame_buffer_size(self._window)
         _GLFWWrapper.make_context_current(self._window)
+
+    def _clear_window(self) -> None:
+        """Reset the window state.
+        Erase all the rendered pixels and updated the width and height dimensions.
+        """
+
+        self.width, self.height = _GLFWWrapper.get_frame_buffer_size(self._window)
+        _GLWrapper.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        _GLWrapper.load_identity()
+        _GLWrapper.viewport(0, 0, self.width, self.height)
+        _GLWrapper.matrix_mode(GL_PROJECTION)
+        _GLWrapper.load_identity()
+        _GLWrapper.ortho(0, self.width, 0, self.height, 0, 1)
+        _GLWrapper.matrix_mode(GL_MODELVIEW)
+        _GLWrapper.load_identity()
 
 
 class Pysics:

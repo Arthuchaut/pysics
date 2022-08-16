@@ -6,7 +6,7 @@ from OpenGL.GL import *
 class _GLWrapper:
     viewport: Final[TypeAlias] = glViewport
     matrix_mode: Final[TypeAlias] = glMatrixMode
-    load_indentity: Final[TypeAlias] = glLoadIdentity
+    load_identity: Final[TypeAlias] = glLoadIdentity
     ortho: Final[TypeAlias] = glOrtho
     clear: Final[TypeAlias] = glClear
     color_3f: Final[TypeAlias] = glColor3f

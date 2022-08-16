@@ -5,7 +5,8 @@ import glfw
 from pytest_mock import MockerFixture
 from pysics.pysics import Pysics, Canvas
 from pysics.types import Color
-from pysics._wrappers import _GLFWWrapper
+from pysics import _wrappers
+from pysics._wrappers import _GLFWWrapper, _GLWrapper
 
 
 @pytest.mark.unit
@@ -104,6 +105,27 @@ class TestCanvas:
             glfw_ctx_mock.assert_called_once()
             assert isinstance(canvas._window, self._FakeWindow)
             assert canvas.width, canvas.height == (400, 400)
+
+    def test_clear_window(self, mocker: MockerFixture) -> None:
+        mocker.patch.object(Canvas, "_init_window")
+        mocker.patch.object(_GLFWWrapper, "get_frame_buffer_size", lambda _: (400, 400))
+        glfw_fsize_spy: MagicMock = mocker.spy(_GLFWWrapper, "get_frame_buffer_size")
+        gl_viewport_mock: MagicMock = mocker.patch.object(_GLWrapper, "viewport")
+        gl_matrix_mock: MagicMock = mocker.patch.object(_GLWrapper, "matrix_mode")
+        gl_load_mock: MagicMock = mocker.patch.object(_GLWrapper, "load_identity")
+        gl_ortho_mock: MagicMock = mocker.patch.object(_GLWrapper, "ortho")
+        gl_clear_mock: MagicMock = mocker.patch.object(_GLWrapper, "clear")
+        canvas: Canvas = Canvas(200, 200)
+        canvas._clear_window()
+        glfw_fsize_spy.assert_called_once_with(canvas._window)
+        gl_viewport_mock.assert_called_once_with(0, 0, canvas.width, canvas.height)
+        gl_matrix_mock.call_count == 2
+        gl_load_mock.call_count == 3
+        gl_ortho_mock.assert_called_once_with(0, canvas.width, 0, canvas.height, 0, 1)
+        gl_clear_mock.assert_called_once_with(
+            _wrappers.GL_COLOR_BUFFER_BIT | _wrappers.GL_DEPTH_BUFFER_BIT
+        )
+        assert canvas.width, canvas.height == (400, 400)
 
 
 @pytest.mark.unit

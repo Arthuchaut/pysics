@@ -11,7 +11,7 @@ class TestGLWrapper:
         attr_mapping: dict[str, Callable[..., Any]] = dict(
             viewport=glViewport,
             matrix_mode=glMatrixMode,
-            load_indentity=glLoadIdentity,
+            load_identity=glLoadIdentity,
             ortho=glOrtho,
             clear=glClear,
             color_3f=glColor3f,
