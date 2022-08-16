@@ -3,7 +3,6 @@ from typing import Final, Optional
 import glfw
 from pysics.types import ByteInt, Color, DrawCallback, Duration, Timestamp
 from pysics._wrappers import (
-    _GLFWWrapper,
     _GLWrapper,
     GL_COLOR_BUFFER_BIT,
     GL_DEPTH_BUFFER_BIT,
@@ -18,7 +17,7 @@ class Canvas:
     Attributes:
         width: The window width.
         height: The windw height.
-        fill: The window bacckground. Default to None (transparent).
+        fill: The window background. Default to None (transparent).
     """
 
     _WINDOW_TITLE: Final[str] = "Sketch"
@@ -51,25 +50,25 @@ class Canvas:
             RuntimeError: If any error occurs on the components initialization.
         """
 
-        if not _GLFWWrapper.init():
+        if not glfw.init():
             raise RuntimeError("Error on the OpenGL initialization.")
 
-        self._window = _GLFWWrapper.create_window(
+        self._window = glfw.create_window(
             self.width, self.height, self._WINDOW_TITLE, None, None
         )
 
         if not self._window:
             raise RuntimeError("Error on the window initialization.")
 
-        self.width, self.height = _GLFWWrapper.get_frame_buffer_size(self._window)
-        _GLFWWrapper.make_context_current(self._window)
+        self.width, self.height = glfw.get_framebuffer_size(self._window)
+        glfw.make_context_current(self._window)
 
     def _clear_window(self) -> None:
         """Reset the window state.
         Erase all the rendered pixels and updated the width and height dimensions.
         """
 
-        self.width, self.height = _GLFWWrapper.get_frame_buffer_size(self._window)
+        self.width, self.height = glfw.get_framebuffer_size(self._window)
         _GLWrapper.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         _GLWrapper.load_identity()
         _GLWrapper.viewport(0, 0, self.width, self.height)
@@ -82,7 +81,7 @@ class Canvas:
     def _swap_buffers(self) -> None:
         """Swap the window buffers."""
 
-        _GLFWWrapper.swap_buffers(self._window)
+        glfw.swap_buffers(self._window)
 
 
 class Pysics:
@@ -148,16 +147,16 @@ class Pysics:
         self._loop = True
         self._reset_timer()
 
-        while not _GLFWWrapper.window_should_close(self.canvas._window):
+        while not glfw.window_should_close(self.canvas._window):
             if self._loop and self._time_elapsed():
                 self.canvas._clear_window()
                 callback()
                 self.canvas._swap_buffers()
                 self._reset_timer()
 
-            _GLFWWrapper.poll_events()
+            glfw.poll_events()
 
-        _GLFWWrapper.terminate()
+        glfw.terminate()
 
     def no_loop(self) -> None:
         """Tell to the rendering loop to stop refreshing the window."""

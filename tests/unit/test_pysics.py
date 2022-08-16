@@ -1,20 +1,18 @@
 from datetime import datetime
 from time import time
-from turtle import width
 from typing import Any, Callable, ClassVar
 from unittest.mock import ANY, MagicMock
 import pytest
-import glfw
 from pytest_mock import MockerFixture
+from freezegun import freeze_time
+import glfw
 from pysics.pysics import Pysics, Canvas
 from pysics.types import Color
 from pysics._wrappers import (
-    _GLFWWrapper,
     _GLWrapper,
     GL_COLOR_BUFFER_BIT,
     GL_DEPTH_BUFFER_BIT,
 )
-from freezegun import freeze_time
 
 
 @pytest.mark.unit
@@ -85,15 +83,13 @@ class TestCanvas:
         throwable: type[RuntimeError] | None,
         mocker: MockerFixture,
     ) -> None:
-        mocker.patch.object(_GLFWWrapper, "init", lambda: init_ret)
-        glfw_init_spy: MagicMock = mocker.spy(_GLFWWrapper, "init")
-        mocker.patch.object(_GLFWWrapper, "create_window", lambda *a, **k: crw_ret)
-        glfw_crw_spy: MagicMock = mocker.spy(_GLFWWrapper, "create_window")
-        mocker.patch.object(_GLFWWrapper, "get_frame_buffer_size", lambda _: (400, 400))
-        glfw_fsize_spy: MagicMock = mocker.spy(_GLFWWrapper, "get_frame_buffer_size")
-        glfw_ctx_mock: MagicMock = mocker.patch.object(
-            _GLFWWrapper, "make_context_current"
-        )
+        mocker.patch.object(glfw, "init", lambda: init_ret)
+        glfw_init_spy: MagicMock = mocker.spy(glfw, "init")
+        mocker.patch.object(glfw, "create_window", lambda *a, **k: crw_ret)
+        glfw_crw_spy: MagicMock = mocker.spy(glfw, "create_window")
+        mocker.patch.object(glfw, "get_framebuffer_size", lambda _: (400, 400))
+        glfw_fsize_spy: MagicMock = mocker.spy(glfw, "get_framebuffer_size")
+        glfw_ctx_mock: MagicMock = mocker.patch.object(glfw, "make_context_current")
         initial_state: Any = Canvas._init_window
         mocker.patch.object(Canvas, "_init_window")
         canvas: Canvas = Canvas(200, 200)
@@ -116,8 +112,8 @@ class TestCanvas:
 
     def test_clear_window(self, mocker: MockerFixture) -> None:
         mocker.patch.object(Canvas, "_init_window")
-        mocker.patch.object(_GLFWWrapper, "get_frame_buffer_size", lambda _: (400, 400))
-        glfw_fsize_spy: MagicMock = mocker.spy(_GLFWWrapper, "get_frame_buffer_size")
+        mocker.patch.object(glfw, "get_framebuffer_size", lambda _: (400, 400))
+        glfw_fsize_spy: MagicMock = mocker.spy(glfw, "get_framebuffer_size")
         gl_viewport_mock: MagicMock = mocker.patch.object(_GLWrapper, "viewport")
         gl_matrix_mock: MagicMock = mocker.patch.object(_GLWrapper, "matrix_mode")
         gl_load_mock: MagicMock = mocker.patch.object(_GLWrapper, "load_identity")
@@ -135,7 +131,7 @@ class TestCanvas:
 
     def test_swap_buffers(self, mocker: MockerFixture) -> None:
         mocker.patch.object(Canvas, "_init_window")
-        glfw_swap_mock: MagicMock = mocker.patch.object(_GLFWWrapper, "swap_buffers")
+        glfw_swap_mock: MagicMock = mocker.patch.object(glfw, "swap_buffers")
         canvas: Canvas = Canvas(200, 200)
         canvas._swap_buffers()
         glfw_swap_mock.assert_called_once_with(canvas._window)
@@ -278,11 +274,11 @@ class TestPysics:
             swap_mock: MagicMock = mocker.patch.object(Canvas, "_swap_buffers")
             canvas = Canvas(200, 200)
 
-        mocker.patch.object(_GLFWWrapper, "poll_events", poll_events_patch)
-        glfw_pe_spy: MagicMock = mocker.spy(_GLFWWrapper, "poll_events")
-        glfw_term_mock: MagicMock = mocker.patch.object(_GLFWWrapper, "terminate")
+        mocker.patch.object(glfw, "poll_events", poll_events_patch)
+        glfw_pe_spy: MagicMock = mocker.spy(glfw, "poll_events")
+        glfw_term_mock: MagicMock = mocker.patch.object(glfw, "terminate")
         mocker.patch.object(
-            _GLFWWrapper,
+            glfw,
             "window_should_close",
             lambda _: self._LOOP_ITERATION >= loop_iterations,
         )
