@@ -5,6 +5,8 @@ from typing import Callable, TypeAlias
 Ratio: TypeAlias = float  # Define a ratio between 0 to 1.
 DrawCallback: TypeAlias = Callable[..., None]
 Vertex: TypeAlias = tuple[float, float]  # Define a (x, y) coordinate.
+Timestamp: TypeAlias = float
+Duration: TypeAlias = float
 
 
 class ByteInt(int):

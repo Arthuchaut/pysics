@@ -1,6 +1,7 @@
+from time import time
 from typing import Final, Optional
 import glfw
-from pysics.types import ByteInt, Color
+from pysics.types import ByteInt, Color, Duration, Timestamp
 from pysics._wrappers import (
     _GLFWWrapper,
     _GLWrapper,
@@ -102,7 +103,8 @@ class Pysics:
 
         self.canvas: Canvas | None = canvas
         self._loop: bool = False
-        self._delay: float = 0.0
+        self._delay: Duration = 0.0
+        self._tref: Timestamp | None = None
 
     def create_canvas(
         self, width: int, height: int, *, fill: Optional[Color | ByteInt] = None
@@ -120,3 +122,17 @@ class Pysics:
 
         self.canvas = Canvas(width, height, fill=fill)
         return self.canvas
+
+    def _reset_timer(self) -> None:
+        """Reset the reference timestamp for the timer."""
+
+        self._tref = time()
+
+    def _time_elapsed(self) -> bool:
+        """Check if the time is reached.
+
+        Returns:
+            bool: True if the time is exceeded, else False.
+        """
+
+        return time() - self._tref >= self._delay

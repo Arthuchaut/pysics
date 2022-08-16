@@ -1,3 +1,5 @@
+from datetime import datetime
+from time import time
 from typing import Any, Callable
 from unittest.mock import ANY, MagicMock
 import pytest
@@ -11,6 +13,7 @@ from pysics._wrappers import (
     GL_COLOR_BUFFER_BIT,
     GL_DEPTH_BUFFER_BIT,
 )
+from freezegun import freeze_time
 
 
 @pytest.mark.unit
@@ -147,11 +150,21 @@ class TestPysics:
         [
             (
                 (),
-                dict(canvas=(..., None), _loop=(..., False), _delay=(..., 0.0)),
+                dict(
+                    canvas=(..., None),
+                    _loop=(..., False),
+                    _delay=(..., 0.0),
+                    _tref=(..., None),
+                ),
             ),
             (
                 (_FakeCanvas(),),
-                dict(canvas=(_FakeCanvas, ...), _loop=(..., False), _delay=(..., 0.0)),
+                dict(
+                    canvas=(_FakeCanvas, ...),
+                    _loop=(..., False),
+                    _delay=(..., 0.0),
+                    _tref=(..., None),
+                ),
             ),
         ],
     )
@@ -199,3 +212,29 @@ class TestPysics:
         canvas_spy.assert_called_once_with(ANY, *exp_args, **exp_kwargs)
         assert isinstance(canvas, Canvas)
         assert engine.canvas == canvas
+
+    @freeze_time(datetime.now())
+    def test_reset_timer(self) -> None:
+        engine: Pysics = Pysics()
+        freezed_ts: float = time()
+        assert engine._tref is None
+        engine._reset_timer()
+        assert engine._tref == freezed_ts
+
+    @freeze_time(datetime.fromtimestamp(1660681241.0), auto_tick_seconds=5)
+    @pytest.mark.parametrize(
+        "delay, expected",
+        [
+            (6, False),
+            (5.1, False),
+            (5, True),
+            (4.9, True),
+            (2, True),
+            (0, True),
+        ],
+    )
+    def test_time_elapsed(self, delay: float, expected: bool) -> None:
+        engine: Pysics = Pysics()
+        engine._delay = delay
+        engine._reset_timer()
+        assert engine._time_elapsed() == expected
