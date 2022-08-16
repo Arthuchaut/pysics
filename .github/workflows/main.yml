@@ -23,7 +23,7 @@ jobs:
       - name: Init environment
         run: |
           Xvfb :1 -screen 0 1200x800x16 &
-          pip install -r requirements-dev.txt
+          pip install -r requirements.txt -r requirements-dev.txt
         
       - name: Run tests
         run: pytest
