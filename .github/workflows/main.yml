@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [ trunk ]
+  pull_request:
+    branches: [ trunk ]
+
+env:
+  DISPLAY: :1.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2.1.4
+        with:
+          python-version: 3.10.5
+
+      - name: Init environment
+        run: |
+          Xvfb :1 -screen 0 1200x800x16 &
+          pip install -r requirements-dev.txt
+        
+      - name: Run tests
+        run: pytest
