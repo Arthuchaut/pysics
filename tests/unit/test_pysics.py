@@ -299,3 +299,15 @@ class TestPysics:
             glfw_term_mock.assert_called_once()
             assert self._CALLBACK_ITERATION == loop_stop
             assert self._LOOP_ITERATION == loop_iterations
+
+    def test_no_loop(self) -> None:
+        engine: Pysics = Pysics()
+        engine._loop = True
+        engine.no_loop()
+        assert engine._loop == False
+
+    def test_wait(self) -> None:
+        engine: Pysics = Pysics()
+        engine._delay = 0.0
+        engine.wait(10)
+        assert engine._delay == 10

@@ -124,7 +124,7 @@ class Pysics:
         return self.canvas
 
     def run_loop(self, callback: DrawCallback) -> None:
-        """Loop through the render process 'til the window close event is triggered.
+        """Loop through the rendering process 'til the window close event is triggered.
 
         Notice that the window rendering is depending of:
             - The _loop attribute which must be True;
@@ -158,6 +158,20 @@ class Pysics:
             _GLFWWrapper.poll_events()
 
         _GLFWWrapper.terminate()
+
+    def no_loop(self) -> None:
+        """Tell to the rendering loop to stop refreshing the window."""
+
+        self._loop = False
+
+    def wait(self, delay: Duration) -> None:
+        """Tell to the rendeing loop to wait until the given duration.
+
+        Args:
+            delay: The duration to wait in seconds.
+        """
+
+        self._delay = delay
 
     def _reset_timer(self) -> None:
         """Reset the reference timestamp for the timer."""
