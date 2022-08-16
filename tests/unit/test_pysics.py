@@ -1,5 +1,5 @@
 from typing import Any, Callable
-from unittest.mock import MagicMock
+from unittest.mock import ANY, MagicMock
 import pytest
 import glfw
 from pytest_mock import MockerFixture
@@ -147,11 +147,11 @@ class TestPysics:
         [
             (
                 (),
-                dict(_canvas=(..., None), _loop=(..., False), _delay=(..., 0.0)),
+                dict(canvas=(..., None), _loop=(..., False), _delay=(..., 0.0)),
             ),
             (
                 (_FakeCanvas(),),
-                dict(_canvas=(_FakeCanvas, ...), _loop=(..., False), _delay=(..., 0.0)),
+                dict(canvas=(_FakeCanvas, ...), _loop=(..., False), _delay=(..., 0.0)),
             ),
         ],
     )
@@ -160,3 +160,42 @@ class TestPysics:
     ) -> None:
         engine: Pysics = Pysics(*args)
         assert_getattr(engine, expected)
+
+    @pytest.mark.parametrize(
+        "args, kwargs, exp_args, exp_kwargs",
+        [
+            (
+                (200, 200),
+                dict(),
+                (200, 200),
+                dict(fill=None),
+            ),
+            (
+                (200, 200),
+                dict(fill=255),
+                (200, 200),
+                dict(fill=255),
+            ),
+            (
+                (200, 200),
+                dict(fill=Color.from_unit(0)),
+                (200, 200),
+                dict(fill=Color.from_unit(0)),
+            ),
+        ],
+    )
+    def test_create_canvas(
+        self,
+        args: Any,
+        kwargs: Any,
+        exp_args: Any,
+        exp_kwargs: Any,
+        mocker: MockerFixture,
+    ) -> None:
+        mocker.patch.object(Canvas, "_init_window")
+        canvas_spy: MagicMock = mocker.spy(Canvas, "__init__")
+        engine: Pysics = Pysics()
+        canvas: Canvas = engine.create_canvas(*args, **kwargs)
+        canvas_spy.assert_called_once_with(ANY, *exp_args, **exp_kwargs)
+        assert isinstance(canvas, Canvas)
+        assert engine.canvas == canvas

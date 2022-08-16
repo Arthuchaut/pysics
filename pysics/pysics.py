@@ -85,7 +85,12 @@ class Canvas:
 
 
 class Pysics:
-    """The main manager that's handle the render and events loops."""
+    """The main manager that's handle the render and events loops.
+
+    Attributes:
+        canvas: The window. If no canvas is given in the constructor, we
+            have to call the create_canvas() method to create it.
+    """
 
     def __init__(self, canvas: Optional[Canvas] = None) -> None:
         """The constructor.
@@ -95,6 +100,23 @@ class Pysics:
                 If None, we need to call the create_canvas() method instead.
         """
 
-        self._canvas: Canvas | None = canvas
+        self.canvas: Canvas | None = canvas
         self._loop: bool = False
         self._delay: float = 0.0
+
+    def create_canvas(
+        self, width: int, height: int, *, fill: Optional[Color | ByteInt] = None
+    ) -> Canvas:
+        """Create and returns a new canvas.
+
+        Args:
+            width: The canvas width.
+            height: The canvas height.
+            fill (Optional): The canvas background. Default to None.
+
+        Returns:
+            Canvas: The created canvas.
+        """
+
+        self.canvas = Canvas(width, height, fill=fill)
+        return self.canvas
