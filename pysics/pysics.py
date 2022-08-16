@@ -78,6 +78,11 @@ class Canvas:
         _GLWrapper.matrix_mode(GL_MODELVIEW)
         _GLWrapper.load_identity()
 
+    def _swap_buffers(self) -> None:
+        """Swap the window buffers."""
+
+        _GLFWWrapper.swap_buffers(self._window)
+
 
 class Pysics:
     """The main manager that's handle the render and events loops."""

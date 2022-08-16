@@ -5,8 +5,12 @@ import glfw
 from pytest_mock import MockerFixture
 from pysics.pysics import Pysics, Canvas
 from pysics.types import Color
-from pysics import _wrappers
-from pysics._wrappers import _GLFWWrapper, _GLWrapper
+from pysics._wrappers import (
+    _GLFWWrapper,
+    _GLWrapper,
+    GL_COLOR_BUFFER_BIT,
+    GL_DEPTH_BUFFER_BIT,
+)
 
 
 @pytest.mark.unit
@@ -122,10 +126,15 @@ class TestCanvas:
         gl_matrix_mock.call_count == 2
         gl_load_mock.call_count == 3
         gl_ortho_mock.assert_called_once_with(0, canvas.width, 0, canvas.height, 0, 1)
-        gl_clear_mock.assert_called_once_with(
-            _wrappers.GL_COLOR_BUFFER_BIT | _wrappers.GL_DEPTH_BUFFER_BIT
-        )
+        gl_clear_mock.assert_called_once_with(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         assert canvas.width, canvas.height == (400, 400)
+
+    def test_swap_buffers(self, mocker: MockerFixture) -> None:
+        mocker.patch.object(Canvas, "_init_window")
+        glfw_swap_mock: MagicMock = mocker.patch.object(_GLFWWrapper, "swap_buffers")
+        canvas: Canvas = Canvas(200, 200)
+        canvas._swap_buffers()
+        glfw_swap_mock.assert_called_once_with(canvas._window)
 
 
 @pytest.mark.unit
