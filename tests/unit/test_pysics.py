@@ -6,6 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 from freezegun import freeze_time
 import glfw
+from glfw.GLFW import GLFW_SAMPLES
 from pysics.pysics import Pysics, Canvas
 from pysics.types import Color
 from pysics._wrappers import (
@@ -15,6 +16,7 @@ from pysics._wrappers import (
     GL_BLEND,
     GL_SRC_ALPHA,
     GL_ONE_MINUS_SRC_ALPHA,
+    GL_MULTISAMPLE,
 )
 
 
@@ -95,6 +97,7 @@ class TestCanvas:
         glfw_ctx_mock: MagicMock = mocker.patch.object(glfw, "make_context_current")
         gl_enable_mock: MagicMock = mocker.patch.object(gl, "enable")
         gl_blend_mock: MagicMock = mocker.patch.object(gl, "blend_func")
+        glfw_wh_mock: MagicMock = mocker.patch.object(glfw, "window_hint")
         initial_state: Any = Canvas._init_window
         mocker.patch.object(Canvas, "_init_window")
         canvas: Canvas = Canvas(200, 200)
@@ -112,7 +115,8 @@ class TestCanvas:
             )
             glfw_fsize_spy.assert_called_once()
             glfw_ctx_mock.assert_called_once()
-            gl_enable_mock.assert_called_once_with(GL_BLEND)
+            gl_enable_mock.assert_called()
+            glfw_wh_mock.assert_called_once_with(GLFW_SAMPLES, canvas._SAMPLES)
             gl_blend_mock.assert_called_once_with(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
             assert isinstance(canvas._window, self._FakeWindow)
             assert canvas.width, canvas.height == (400, 400)

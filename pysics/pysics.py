@@ -1,6 +1,7 @@
 from time import time
 from typing import Final, Optional
 import glfw
+from glfw.GLFW import GLFW_SAMPLES
 from pysics.types import ByteInt, Color, DrawCallback, Duration, Timestamp
 from pysics._wrappers import (
     gl,
@@ -11,6 +12,7 @@ from pysics._wrappers import (
     GL_BLEND,
     GL_SRC_ALPHA,
     GL_ONE_MINUS_SRC_ALPHA,
+    GL_MULTISAMPLE,
 )
 
 
@@ -24,6 +26,7 @@ class Canvas:
     """
 
     _WINDOW_TITLE: Final[str] = "Sketch"
+    _SAMPLES: Final[int] = 4
 
     def __init__(
         self, width: int, height: int, *, background: Optional[Color | ByteInt] = 0
@@ -56,6 +59,7 @@ class Canvas:
         if not glfw.init():
             raise RuntimeError("Error on the OpenGL initialization.")
 
+        glfw.window_hint(GLFW_SAMPLES, self._SAMPLES)
         self._window = glfw.create_window(
             self.width, self.height, self._WINDOW_TITLE, None, None
         )
@@ -66,6 +70,7 @@ class Canvas:
         self.width, self.height = glfw.get_framebuffer_size(self._window)
         glfw.make_context_current(self._window)
         gl.enable(GL_BLEND)
+        gl.enable(GL_MULTISAMPLE)
         gl.blend_func(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def _clear_window(self) -> None:
