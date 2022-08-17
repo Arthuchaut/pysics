@@ -8,6 +8,7 @@ class _GLWrapper:
     load_identity: Final[TypeAlias] = glLoadIdentity
     ortho: Final[TypeAlias] = glOrtho
     clear: Final[TypeAlias] = glClear
+    clear_color: Final[TypeAlias] = glClearColor
     color_3f: Final[TypeAlias] = glColor3f
     color_4f: Final[TypeAlias] = glColor4f
     begin: Final[TypeAlias] = glBegin

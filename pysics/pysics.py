@@ -17,27 +17,27 @@ class Canvas:
     Attributes:
         width: The window width.
         height: The windw height.
-        fill: The window background. Default to None (transparent).
+        background: The window background color. Default to 0.
     """
 
     _WINDOW_TITLE: Final[str] = "Sketch"
 
     def __init__(
-        self, width: int, height: int, *, fill: Optional[Color | ByteInt] = None
+        self, width: int, height: int, *, background: Optional[Color | ByteInt] = 0
     ) -> None:
         """The constructor that's also init the OpenGL components.
 
         Args:
             width: The window width.
             height: The window height.
-            fill (Optional): The window background. Default to None.
+            background (Optional): The window background color. Default to 0.
         """
 
         self._window: glfw._GLFWwindow | None = None
         self.width: int = width
         self.height: int = height
-        self.fill: Color | None = (
-            Color.from_unit(fill) if isinstance(fill, int) else fill
+        self.background: Color = (
+            Color.from_unit(background) if isinstance(background, int) else background
         )
         self._init_window()
 
@@ -69,6 +69,7 @@ class Canvas:
         """
 
         self.width, self.height = glfw.get_framebuffer_size(self._window)
+        _GLWrapper.clear_color(*self.background.ratios)
         _GLWrapper.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         _GLWrapper.load_identity()
         _GLWrapper.viewport(0, 0, self.width, self.height)
@@ -106,20 +107,20 @@ class Pysics:
         self._tref: Timestamp | None = None
 
     def create_canvas(
-        self, width: int, height: int, *, fill: Optional[Color | ByteInt] = None
+        self, width: int, height: int, *, background: Optional[Color | ByteInt] = 0
     ) -> Canvas:
         """Create and returns a new canvas.
 
         Args:
             width: The canvas width.
             height: The canvas height.
-            fill (Optional): The canvas background. Default to None.
+            background (Optional): The canvas background color. Default to 0.
 
         Returns:
             Canvas: The created canvas.
         """
 
-        self.canvas = Canvas(width, height, fill=fill)
+        self.canvas = Canvas(width, height, background=background)
         return self.canvas
 
     def run_loop(self, callback: DrawCallback) -> None:

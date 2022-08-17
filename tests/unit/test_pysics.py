@@ -30,27 +30,27 @@ class TestCanvas:
                     _window=(..., None),
                     width=(..., 200),
                     height=(..., 200),
-                    fill=(..., None),
+                    background=(..., Color.from_unit(0)),
                 ),
             ),
             (
                 (200, 200),
-                dict(fill=255),
+                dict(background=255),
                 dict(
                     _window=(..., None),
                     width=(..., 200),
                     height=(..., 200),
-                    fill=(..., Color.from_unit(255)),
+                    background=(..., Color.from_unit(255)),
                 ),
             ),
             (
                 (200, 200),
-                dict(fill=Color.from_unit(0)),
+                dict(background=Color.from_unit(120)),
                 dict(
                     _window=(..., None),
                     width=(..., 200),
                     height=(..., 200),
-                    fill=(..., Color.from_unit(0)),
+                    background=(..., Color.from_unit(120)),
                 ),
             ),
         ],
@@ -114,6 +114,7 @@ class TestCanvas:
         mocker.patch.object(Canvas, "_init_window")
         mocker.patch.object(glfw, "get_framebuffer_size", lambda _: (400, 400))
         glfw_fsize_spy: MagicMock = mocker.spy(glfw, "get_framebuffer_size")
+        gl_clearc_mock: MagicMock = mocker.patch.object(_GLWrapper, "clear_color")
         gl_viewport_mock: MagicMock = mocker.patch.object(_GLWrapper, "viewport")
         gl_matrix_mock: MagicMock = mocker.patch.object(_GLWrapper, "matrix_mode")
         gl_load_mock: MagicMock = mocker.patch.object(_GLWrapper, "load_identity")
@@ -122,6 +123,7 @@ class TestCanvas:
         canvas: Canvas = Canvas(200, 200)
         canvas._clear_window()
         glfw_fsize_spy.assert_called_once_with(canvas._window)
+        gl_clearc_mock.assert_called_once_with(*canvas.background.ratios)
         gl_viewport_mock.assert_called_once_with(0, 0, canvas.width, canvas.height)
         gl_matrix_mock.call_count == 2
         gl_load_mock.call_count == 3
@@ -181,19 +183,19 @@ class TestPysics:
                 (200, 200),
                 dict(),
                 (200, 200),
-                dict(fill=None),
+                dict(background=0),
             ),
             (
                 (200, 200),
-                dict(fill=255),
+                dict(background=255),
                 (200, 200),
-                dict(fill=255),
+                dict(background=255),
             ),
             (
                 (200, 200),
-                dict(fill=Color.from_unit(0)),
+                dict(background=Color.from_unit(120)),
                 (200, 200),
-                dict(fill=Color.from_unit(0)),
+                dict(background=Color.from_unit(120)),
             ),
         ],
     )
