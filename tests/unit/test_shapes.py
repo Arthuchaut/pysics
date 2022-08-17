@@ -126,7 +126,7 @@ class TestRect:
         shape._render()
         gl_begin_mock.assert_called_once_with(GL_QUADS)
         gl_end_mock.assert_called_once()
-        draw_vertices_mock.call_count == 4
+        draw_vertices_mock.assert_called_once_with(vertices)
 
         if bg:
             gl_color_mock.assert_called_once_with(*bg.ratios)
