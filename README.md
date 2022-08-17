@@ -18,8 +18,8 @@ Name                  Stmts   Miss  Cover   Missing
 pysics/__init__.py        0      0   100%
 pysics/_wrappers.py      19      0   100%
 pysics/pysics.py         66      0   100%
-pysics/shapes.py         45      0   100%
+pysics/shapes.py         47      0   100%
 pysics/types.py          28      0   100%
 ---------------------------------------------------
-TOTAL                   158      0   100%
+TOTAL                   160      0   100%
 ```

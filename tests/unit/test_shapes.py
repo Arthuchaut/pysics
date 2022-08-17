@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 from pysics.types import Color, Vertex
-from pysics._wrappers import _GLWrapper, GL_QUADS, GL_LINE_LOOP, GL_LINE
+from pysics._wrappers import _GLWrapper, GL_QUADS, GL_LINE_LOOP
 from pysics.shapes import BaseShape, Line, Rect
 
 
@@ -148,7 +148,7 @@ class TestRect:
         gl_begin_mock: MagicMock = mocker.patch.object(_GLWrapper, "begin")
         gl_end_mock: MagicMock = mocker.patch.object(_GLWrapper, "end")
         gl_vertex_mock: MagicMock = mocker.patch.object(_GLWrapper, "vertex_2f")
-        gl_lw_mock: MagicMock = mocker.patch.object(_GLWrapper, "line_width")
+        outline_mock: MagicMock = mocker.patch.object(Line, "outline")
         vertices: list[Vertex] = [(10, 20), (50, 20), (50, 70), (10, 70)]
         initial_state: Any = Rect._render
         mocker.patch.object(Rect, "_render")
@@ -157,23 +157,15 @@ class TestRect:
         shape._render()
 
         if stroke:
-            for param, exp_args in zip(
-                (GL_QUADS, GL_LINE_LOOP), gl_begin_mock.call_args_list
-            ):
-                assert param == exp_args.args[0]
+            outline_mock.assert_called_once_with(
+                vertices, stroke=shape.stroke, stroke_weight=shape.stroke_weight
+            )
 
-            gl_end_mock.call_count == 2
+        gl_begin_mock.assert_called_once_with(GL_QUADS)
+        gl_end_mock.assert_called_once()
 
-            for vertex, exp_args in zip(vertices * 2, gl_vertex_mock.call_args_list):
-                assert vertex == exp_args.args
-
-            gl_lw_mock.assert_called_once()
-        else:
-            gl_begin_mock.assert_called_once_with(GL_QUADS)
-            gl_end_mock.assert_called_once()
-
-            for vertex, exp_args in zip(vertices, gl_vertex_mock.call_args_list):
-                assert vertex == exp_args.args
+        for vertex, exp_args in zip(vertices, gl_vertex_mock.call_args_list):
+            assert vertex == exp_args.args
 
         if bg:
             gl_color_mock.assert_called()
@@ -190,33 +182,39 @@ class TestLine:
         "args, kwargs, expected",
         [
             (
-                (10, 20),
+                (10, 20, 40, 50),
                 dict(),
                 dict(
                     x=(..., 10),
                     y=(..., 20),
+                    dx=(..., 40),
+                    dy=(..., 50),
                     fill=(..., None),
                     stroke=(..., None),
                     stroke_weight=(..., 1.0),
                 ),
             ),
             (
-                (10, 20),
+                (10, 20, 40, 50),
                 dict(stroke=100, stroke_weight=5),
                 dict(
                     x=(..., 10),
                     y=(..., 20),
+                    dx=(..., 40),
+                    dy=(..., 50),
                     fill=(..., None),
                     stroke=(..., Color.from_unit(100)),
                     stroke_weight=(..., 5.0),
                 ),
             ),
             (
-                (10, 20),
+                (10, 20, 40, 50),
                 dict(stroke=Color.from_unit(100)),
                 dict(
                     x=(..., 10),
                     y=(..., 20),
+                    dx=(..., 40),
+                    dy=(..., 50),
                     fill=(..., None),
                     stroke=(..., Color.from_unit(100)),
                     stroke_weight=(..., 1.0),
@@ -250,21 +248,41 @@ class TestLine:
         gl_end_mock: MagicMock = mocker.patch.object(_GLWrapper, "end")
         gl_vertex_mock: MagicMock = mocker.patch.object(_GLWrapper, "vertex_2f")
         gl_lw_mock: MagicMock = mocker.patch.object(_GLWrapper, "line_width")
+        vertices: list[Vertex] = [(10, 20), (40, 50)]
         initial_state: Any = Line._render
         mocker.patch.object(Line, "_render")
-        shape: Line = Line(10, 20, stroke=stroke)
+        shape: Line = Line(10, 20, 40, 50, stroke=stroke)
         shape._render = lambda: initial_state(shape)
         shape._render()
 
         if stroke:
             gl_color_mock.assert_called_once_with(*shape.stroke.ratios)
-            gl_begin_mock.assert_called_once_with(GL_LINE)
-            gl_vertex_mock.assert_called_once_with(10, 20)
+            gl_begin_mock.assert_called_once_with(GL_LINE_LOOP)
             gl_lw_mock.assert_called_once_with(shape.stroke_weight)
             gl_end_mock.assert_called_once()
+
+            for vertex, exp_args in zip(vertices, gl_vertex_mock.call_args_list):
+                assert vertex == exp_args.args
         else:
             gl_color_mock.assert_not_called()
             gl_begin_mock.assert_not_called()
             gl_vertex_mock.assert_not_called()
             gl_lw_mock.assert_not_called()
             gl_end_mock.assert_not_called()
+
+    def test_outline(self, mocker: MockerFixture) -> None:
+        mocker.patch.object(Line, "__init__", lambda *a, **k: None)
+        line_spy: MagicMock = mocker.spy(Line, "__init__")
+        vertices: list[Vertex] = [(0, 0), (1, 0), (1, 1), (0, 1)]
+        stroke: int = 0
+        stroke_weight: int = 1
+        Line.outline(vertices, stroke=stroke, stroke_weight=stroke_weight)
+
+        for i in range(len(vertices)):
+            x, y = vertices[i]
+            dx, dy = vertices[(i + 1) % len(vertices)]
+            assert (x, y, dx, dy) == line_spy.call_args_list[i].args[1:]
+            assert (
+                dict(stroke=stroke, stroke_weight=stroke_weight)
+                == line_spy.call_args_list[i].kwargs
+            )

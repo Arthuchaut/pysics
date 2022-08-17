@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 from pysics.types import Color, ByteInt, PIndex, Vertex
-from pysics._wrappers import _GLWrapper, GL_QUADS, GL_LINE_LOOP, GL_LINE
+from pysics._wrappers import _GLWrapper, GL_QUADS, GL_LINE_LOOP
 
 
 class BaseShape(ABC):
@@ -60,6 +60,8 @@ class Line(BaseShape):
     Attributes:
         x: The x-axis of the shape position.
         y: The y-axis of the shape position.
+        dx: The x-axis of the shape end position.
+        dy: The y-axis of the shape end position.
         stroke (Optional): The outline color of the shape. Default to None.
         stroke_weight (Optional): The outline width of the shape. Default to 1.0.
     """
@@ -68,6 +70,8 @@ class Line(BaseShape):
         self,
         x: PIndex,
         y: PIndex,
+        dx: PIndex,
+        dy: PIndex,
         *,
         stroke: Optional[Color | ByteInt] = None,
         stroke_weight: Optional[int | float] = 1,
@@ -75,12 +79,16 @@ class Line(BaseShape):
         """The constructor.
 
         Args:
-            x: The x-axis of the shape position.
-            y: The y-axis of the shape position.
+            x: The x-axis of the shape begin position.
+            y: The y-axis of the shape begin position.
+            dx: The x-axis of the shape end position.
+            dy: The y-axis of the shape end position.
             stroke (Optional): The outline color of the shape. Default to None.
             stroke_weight (Optional): The outline width of the shape. Default to 1.0.
         """
 
+        self.dx: PIndex = dx
+        self.dy: PIndex = dy
         super().__init__(x, y, stroke=stroke, stroke_weight=stroke_weight)
 
     def _render(self) -> None:
@@ -89,9 +97,34 @@ class Line(BaseShape):
         if self.stroke:
             _GLWrapper.color_4f(*self.stroke.ratios)
             _GLWrapper.line_width(self.stroke_weight)
-            _GLWrapper.begin(GL_LINE)
+            _GLWrapper.begin(GL_LINE_LOOP)
             _GLWrapper.vertex_2f(self.x, self.y)
+            _GLWrapper.vertex_2f(self.dx, self.dy)
             _GLWrapper.end()
+
+    @classmethod
+    def outline(
+        cls,
+        vertices: list[Vertex],
+        *,
+        stroke: Color | ByteInt,
+        stroke_weight: Optional[int | float] = 1,
+    ) -> None:
+        """Create an outile from the given vertices.
+
+        Args:
+            vertices: The list of x, y coordinates that define the line shape.
+            stoke: The color of the outline.
+            stroke_weight (Optional): The outline width. Default to 1.
+        """
+
+        for i in range(len(vertices)):
+            cls(
+                *vertices[i],
+                *vertices[(i + 1) % len(vertices)],
+                stroke=stroke,
+                stroke_weight=stroke_weight,
+            )
 
 
 class Rect(BaseShape):
@@ -156,11 +189,4 @@ class Rect(BaseShape):
         _GLWrapper.end()
 
         if self.stroke:
-            _GLWrapper.color_4f(*self.stroke.ratios)
-            _GLWrapper.line_width(self.stroke_weight)
-            _GLWrapper.begin(GL_LINE_LOOP)
-
-            for vertex in vertices:
-                _GLWrapper.vertex_2f(*vertex)
-
-            _GLWrapper.end()
+            Line.outline(vertices, stroke=self.stroke, stroke_weight=self.stroke_weight)
