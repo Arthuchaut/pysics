@@ -8,6 +8,9 @@ from pysics._wrappers import (
     GL_DEPTH_BUFFER_BIT,
     GL_PROJECTION,
     GL_MODELVIEW,
+    GL_BLEND,
+    GL_SRC_ALPHA,
+    GL_ONE_MINUS_SRC_ALPHA,
 )
 
 
@@ -62,6 +65,8 @@ class Canvas:
 
         self.width, self.height = glfw.get_framebuffer_size(self._window)
         glfw.make_context_current(self._window)
+        _GLWrapper.enable(GL_BLEND)
+        _GLWrapper.blend_func(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def _clear_window(self) -> None:
         """Reset the window state.

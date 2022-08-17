@@ -12,6 +12,9 @@ from pysics._wrappers import (
     _GLWrapper,
     GL_COLOR_BUFFER_BIT,
     GL_DEPTH_BUFFER_BIT,
+    GL_BLEND,
+    GL_SRC_ALPHA,
+    GL_ONE_MINUS_SRC_ALPHA,
 )
 
 
@@ -90,6 +93,8 @@ class TestCanvas:
         mocker.patch.object(glfw, "get_framebuffer_size", lambda _: (400, 400))
         glfw_fsize_spy: MagicMock = mocker.spy(glfw, "get_framebuffer_size")
         glfw_ctx_mock: MagicMock = mocker.patch.object(glfw, "make_context_current")
+        gl_enable_mock: MagicMock = mocker.patch.object(_GLWrapper, "enable")
+        gl_blend_mock: MagicMock = mocker.patch.object(_GLWrapper, "blend_func")
         initial_state: Any = Canvas._init_window
         mocker.patch.object(Canvas, "_init_window")
         canvas: Canvas = Canvas(200, 200)
@@ -107,6 +112,8 @@ class TestCanvas:
             )
             glfw_fsize_spy.assert_called_once()
             glfw_ctx_mock.assert_called_once()
+            gl_enable_mock.assert_called_once_with(GL_BLEND)
+            gl_blend_mock.assert_called_once_with(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
             assert isinstance(canvas._window, self._FakeWindow)
             assert canvas.width, canvas.height == (400, 400)
 

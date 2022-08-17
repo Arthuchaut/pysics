@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 from pysics.types import Color, ByteInt, PIndex, Vertex
-from pysics._wrappers import _GLWrapper, GL_QUADS
+from pysics._wrappers import _GLWrapper, GL_QUADS, GL_LINE_LOOP
 
 
 class BaseShape(ABC):
@@ -11,10 +11,18 @@ class BaseShape(ABC):
         x: The x-axis of the shape position.
         y: The y-axis of the shape position.
         fill (Optional): The filling color of the shape. Default to None.
+        stroke (Optional): The outline color of the shape. Default to None.
+        stroke_weight (Optional): The outline width of the shape. Default to 1.0.
     """
 
     def __init__(
-        self, x: PIndex, y: PIndex, *, fill: Optional[Color | ByteInt] = None
+        self,
+        x: PIndex,
+        y: PIndex,
+        *,
+        fill: Optional[Color | ByteInt] = None,
+        stroke: Optional[Color | ByteInt] = None,
+        stroke_weight: Optional[int | float] = 1.0,
     ) -> None:
         """The constructor.
         Automatically render the shape by calling _render() after initialized
@@ -24,6 +32,8 @@ class BaseShape(ABC):
             x: The x-axis of the shape position.
             y: The y-axis of the shape position.
             fill (Optional): The filling color of the shape. Default to None.
+            stroke (Optional): The outline color of the shape. Default to None.
+            stroke_weight (Optional): The outline width of the shape. Default to 1.
         """
 
         self.x: PIndex = x
@@ -31,6 +41,10 @@ class BaseShape(ABC):
         self.fill: Color | None = (
             Color.from_unit(fill) if isinstance(fill, int) else fill
         )
+        self.stroke: Color | None = (
+            Color.from_unit(stroke) if isinstance(stroke, int) else stroke
+        )
+        self.stroke_weight: float = float(stroke_weight)
         self._render()
 
     @abstractmethod
@@ -49,6 +63,8 @@ class Rect(BaseShape):
         width: The width of the shape.
         height: The height of the shape.
         fill (Optional): The filling color of the shape. Default to None.
+        stroke (Optional): The outline color of the shape. Default to None.
+        stroke_weight (Optional): The outline width of the shape. Default to 1.0.
     """
 
     def __init__(
@@ -58,7 +74,9 @@ class Rect(BaseShape):
         width: float,
         height: float,
         *,
-        fill: Optional[Color | ByteInt] = None
+        fill: Optional[Color | ByteInt] = None,
+        stroke: Optional[Color | ByteInt] = None,
+        stroke_weight: Optional[int | float] = 1.0,
     ) -> None:
         """The constructor.
         First initialize its own properties, then init its inherited shape.
@@ -69,11 +87,13 @@ class Rect(BaseShape):
             width: The width of the shape.
             height: The height of the shape.
             fill (Optional): The filling color of the shape. Default to None.
+            stroke (Optional): The outline color of the shape. Default to None.
+            stroke_weight (Optional): The outline width of the shape. Default to 1.
         """
 
         self.width: float = width
         self.height: float = height
-        super().__init__(x, y, fill=fill)
+        super().__init__(x, y, fill=fill, stroke=stroke, stroke_weight=stroke_weight)
 
     def _render(self) -> None:
         """Render the rectangle to the window."""
@@ -94,3 +114,13 @@ class Rect(BaseShape):
             _GLWrapper.vertex_2f(*vertex)
 
         _GLWrapper.end()
+
+        if self.stroke:
+            _GLWrapper.color_4f(*self.stroke.ratios)
+            _GLWrapper.line_width(self.stroke_weight)
+            _GLWrapper.begin(GL_LINE_LOOP)
+
+            for vertex in vertices:
+                _GLWrapper.vertex_2f(*vertex)
+
+            _GLWrapper.end()
