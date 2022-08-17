@@ -9,7 +9,7 @@ import glfw
 from pysics.pysics import Pysics, Canvas
 from pysics.types import Color
 from pysics._wrappers import (
-    _GLWrapper,
+    gl,
     GL_COLOR_BUFFER_BIT,
     GL_DEPTH_BUFFER_BIT,
     GL_BLEND,
@@ -93,8 +93,8 @@ class TestCanvas:
         mocker.patch.object(glfw, "get_framebuffer_size", lambda _: (400, 400))
         glfw_fsize_spy: MagicMock = mocker.spy(glfw, "get_framebuffer_size")
         glfw_ctx_mock: MagicMock = mocker.patch.object(glfw, "make_context_current")
-        gl_enable_mock: MagicMock = mocker.patch.object(_GLWrapper, "enable")
-        gl_blend_mock: MagicMock = mocker.patch.object(_GLWrapper, "blend_func")
+        gl_enable_mock: MagicMock = mocker.patch.object(gl, "enable")
+        gl_blend_mock: MagicMock = mocker.patch.object(gl, "blend_func")
         initial_state: Any = Canvas._init_window
         mocker.patch.object(Canvas, "_init_window")
         canvas: Canvas = Canvas(200, 200)
@@ -121,12 +121,12 @@ class TestCanvas:
         mocker.patch.object(Canvas, "_init_window")
         mocker.patch.object(glfw, "get_framebuffer_size", lambda _: (400, 400))
         glfw_fsize_spy: MagicMock = mocker.spy(glfw, "get_framebuffer_size")
-        gl_clearc_mock: MagicMock = mocker.patch.object(_GLWrapper, "clear_color")
-        gl_viewport_mock: MagicMock = mocker.patch.object(_GLWrapper, "viewport")
-        gl_matrix_mock: MagicMock = mocker.patch.object(_GLWrapper, "matrix_mode")
-        gl_load_mock: MagicMock = mocker.patch.object(_GLWrapper, "load_identity")
-        gl_ortho_mock: MagicMock = mocker.patch.object(_GLWrapper, "ortho")
-        gl_clear_mock: MagicMock = mocker.patch.object(_GLWrapper, "clear")
+        gl_clearc_mock: MagicMock = mocker.patch.object(gl, "clear_color")
+        gl_viewport_mock: MagicMock = mocker.patch.object(gl, "viewport")
+        gl_matrix_mock: MagicMock = mocker.patch.object(gl, "matrix_mode")
+        gl_load_mock: MagicMock = mocker.patch.object(gl, "load_identity")
+        gl_ortho_mock: MagicMock = mocker.patch.object(gl, "ortho")
+        gl_clear_mock: MagicMock = mocker.patch.object(gl, "clear")
         canvas: Canvas = Canvas(200, 200)
         canvas._clear_window()
         glfw_fsize_spy.assert_called_once_with(canvas._window)

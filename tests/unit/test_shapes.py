@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 from pysics.types import Color, Vertex
-from pysics._wrappers import _GLWrapper, GL_QUADS, GL_LINE_LOOP, GL_POLYGON
+from pysics._wrappers import gl, GL_QUADS, GL_LINE_LOOP, GL_POLYGON
 from pysics.shapes import BaseShape, Circle, Ellipse, Line, Rect
 
 
@@ -144,10 +144,10 @@ class TestRect:
     def test_render(
         self, bg: Color | None, stroke: Color | None, mocker: MockerFixture
     ) -> None:
-        gl_color_mock: MagicMock = mocker.patch.object(_GLWrapper, "color_4f")
-        gl_begin_mock: MagicMock = mocker.patch.object(_GLWrapper, "begin")
-        gl_end_mock: MagicMock = mocker.patch.object(_GLWrapper, "end")
-        gl_vertex_mock: MagicMock = mocker.patch.object(_GLWrapper, "vertex_2f")
+        gl_color_mock: MagicMock = mocker.patch.object(gl, "color_4f")
+        gl_begin_mock: MagicMock = mocker.patch.object(gl, "begin")
+        gl_end_mock: MagicMock = mocker.patch.object(gl, "end")
+        gl_vertex_mock: MagicMock = mocker.patch.object(gl, "vertex_2f")
         outline_mock: MagicMock = mocker.patch.object(Line, "outline")
         vertices: list[Vertex] = [(10, 20), (50, 20), (50, 70), (10, 70)]
         initial_state: Any = Rect._render
@@ -243,11 +243,11 @@ class TestLine:
         ],
     )
     def test_render(self, stroke: Color | None, mocker: MockerFixture) -> None:
-        gl_color_mock: MagicMock = mocker.patch.object(_GLWrapper, "color_4f")
-        gl_begin_mock: MagicMock = mocker.patch.object(_GLWrapper, "begin")
-        gl_end_mock: MagicMock = mocker.patch.object(_GLWrapper, "end")
-        gl_vertex_mock: MagicMock = mocker.patch.object(_GLWrapper, "vertex_2f")
-        gl_lw_mock: MagicMock = mocker.patch.object(_GLWrapper, "line_width")
+        gl_color_mock: MagicMock = mocker.patch.object(gl, "color_4f")
+        gl_begin_mock: MagicMock = mocker.patch.object(gl, "begin")
+        gl_end_mock: MagicMock = mocker.patch.object(gl, "end")
+        gl_vertex_mock: MagicMock = mocker.patch.object(gl, "vertex_2f")
+        gl_lw_mock: MagicMock = mocker.patch.object(gl, "line_width")
         vertices: list[Vertex] = [(10, 20), (40, 50)]
         initial_state: Any = Line._render
         mocker.patch.object(Line, "_render")
@@ -271,11 +271,11 @@ class TestLine:
             gl_end_mock.assert_not_called()
 
     def test_outline(self, mocker: MockerFixture) -> None:
-        gl_color_mock: MagicMock = mocker.patch.object(_GLWrapper, "color_4f")
-        gl_begin_mock: MagicMock = mocker.patch.object(_GLWrapper, "begin")
-        gl_end_mock: MagicMock = mocker.patch.object(_GLWrapper, "end")
-        gl_vertex_mock: MagicMock = mocker.patch.object(_GLWrapper, "vertex_2f")
-        gl_lw_mock: MagicMock = mocker.patch.object(_GLWrapper, "line_width")
+        gl_color_mock: MagicMock = mocker.patch.object(gl, "color_4f")
+        gl_begin_mock: MagicMock = mocker.patch.object(gl, "begin")
+        gl_end_mock: MagicMock = mocker.patch.object(gl, "end")
+        gl_vertex_mock: MagicMock = mocker.patch.object(gl, "vertex_2f")
+        gl_lw_mock: MagicMock = mocker.patch.object(gl, "line_width")
         vertices: list[Vertex] = [(0, 0), (1, 0), (1, 1), (0, 1)]
         stroke: Color = 1
         stroke_weight: int = 1.0
@@ -365,10 +365,10 @@ class TestEllipse:
     def test_render(
         self, fill: Color | None, stroke: Color | None, mocker: MockerFixture
     ) -> None:
-        gl_color_mock: MagicMock = mocker.patch.object(_GLWrapper, "color_4f")
-        gl_begin_mock: MagicMock = mocker.patch.object(_GLWrapper, "begin")
-        gl_end_mock: MagicMock = mocker.patch.object(_GLWrapper, "end")
-        gl_vertex_mock: MagicMock = mocker.patch.object(_GLWrapper, "vertex_2f")
+        gl_color_mock: MagicMock = mocker.patch.object(gl, "color_4f")
+        gl_begin_mock: MagicMock = mocker.patch.object(gl, "begin")
+        gl_end_mock: MagicMock = mocker.patch.object(gl, "end")
+        gl_vertex_mock: MagicMock = mocker.patch.object(gl, "vertex_2f")
         outline_mock: MagicMock = mocker.patch.object(Line, "outline")
         initial_state: Any = Ellipse._render
         mocker.patch.object(Ellipse, "_render")

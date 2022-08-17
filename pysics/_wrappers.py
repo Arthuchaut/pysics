@@ -3,6 +3,8 @@ from OpenGL.GL import *
 
 
 class _GLWrapper:
+    """Just a mapping of GL functions with more pythonic naming."""
+
     viewport: Final[TypeAlias] = glViewport
     matrix_mode: Final[TypeAlias] = glMatrixMode
     load_identity: Final[TypeAlias] = glLoadIdentity
@@ -19,3 +21,7 @@ class _GLWrapper:
     vertex_2f: Final[TypeAlias] = glVertex2f
     enable: Final[TypeAlias] = glEnable
     blend_func: Final[TypeAlias] = glBlendFunc
+
+
+# To get more coherence with glfw structure.
+gl: type[_GLWrapper] = _GLWrapper

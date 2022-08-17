@@ -3,7 +3,7 @@ from typing import Final, Optional
 import glfw
 from pysics.types import ByteInt, Color, DrawCallback, Duration, Timestamp
 from pysics._wrappers import (
-    _GLWrapper,
+    gl,
     GL_COLOR_BUFFER_BIT,
     GL_DEPTH_BUFFER_BIT,
     GL_PROJECTION,
@@ -65,8 +65,8 @@ class Canvas:
 
         self.width, self.height = glfw.get_framebuffer_size(self._window)
         glfw.make_context_current(self._window)
-        _GLWrapper.enable(GL_BLEND)
-        _GLWrapper.blend_func(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        gl.enable(GL_BLEND)
+        gl.blend_func(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def _clear_window(self) -> None:
         """Reset the window state.
@@ -74,15 +74,15 @@ class Canvas:
         """
 
         self.width, self.height = glfw.get_framebuffer_size(self._window)
-        _GLWrapper.clear_color(*self.background.ratios)
-        _GLWrapper.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        _GLWrapper.load_identity()
-        _GLWrapper.viewport(0, 0, self.width, self.height)
-        _GLWrapper.matrix_mode(GL_PROJECTION)
-        _GLWrapper.load_identity()
-        _GLWrapper.ortho(0, self.width, 0, self.height, 0, 1)
-        _GLWrapper.matrix_mode(GL_MODELVIEW)
-        _GLWrapper.load_identity()
+        gl.clear_color(*self.background.ratios)
+        gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        gl.load_identity()
+        gl.viewport(0, 0, self.width, self.height)
+        gl.matrix_mode(GL_PROJECTION)
+        gl.load_identity()
+        gl.ortho(0, self.width, 0, self.height, 0, 1)
+        gl.matrix_mode(GL_MODELVIEW)
+        gl.load_identity()
 
     def _swap_buffers(self) -> None:
         """Swap the window buffers."""

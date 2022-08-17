@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from math import cos, pi, sin
 from typing import Optional
 from pysics.types import Color, ByteInt, PIndex, Vertex
-from pysics._wrappers import _GLWrapper, GL_QUADS, GL_LINE_LOOP, GL_POLYGON
+from pysics._wrappers import gl, GL_QUADS, GL_LINE_LOOP, GL_POLYGON
 
 
 class BaseShape(ABC):
@@ -99,12 +99,12 @@ class Line(BaseShape):
         """Render the line to the window."""
 
         if self.stroke:
-            _GLWrapper.color_4f(*self.stroke.ratios)
-            _GLWrapper.line_width(self.stroke_weight)
-            _GLWrapper.begin(GL_LINE_LOOP)
-            _GLWrapper.vertex_2f(self.x, self.y)
-            _GLWrapper.vertex_2f(self.dx, self.dy)
-            _GLWrapper.end()
+            gl.color_4f(*self.stroke.ratios)
+            gl.line_width(self.stroke_weight)
+            gl.begin(GL_LINE_LOOP)
+            gl.vertex_2f(self.x, self.y)
+            gl.vertex_2f(self.dx, self.dy)
+            gl.end()
 
     @classmethod
     def outline(
@@ -125,14 +125,14 @@ class Line(BaseShape):
         if isinstance(stroke, int):
             stroke = Color.from_unit(stroke)
 
-        _GLWrapper.color_4f(*stroke.ratios)
-        _GLWrapper.line_width(stroke_weight)
-        _GLWrapper.begin(GL_LINE_LOOP)
+        gl.color_4f(*stroke.ratios)
+        gl.line_width(stroke_weight)
+        gl.begin(GL_LINE_LOOP)
 
         for vertex in vertices:
-            _GLWrapper.vertex_2f(*vertex)
+            gl.vertex_2f(*vertex)
 
-        _GLWrapper.end()
+        gl.end()
 
 
 class Rect(BaseShape):
@@ -187,14 +187,14 @@ class Rect(BaseShape):
         ]
 
         if self.fill:
-            _GLWrapper.color_4f(*self.fill.ratios)
+            gl.color_4f(*self.fill.ratios)
 
-        _GLWrapper.begin(GL_QUADS)
+        gl.begin(GL_QUADS)
 
         for vertex in vertices:
-            _GLWrapper.vertex_2f(*vertex)
+            gl.vertex_2f(*vertex)
 
-        _GLWrapper.end()
+        gl.end()
 
         if self.stroke:
             Line.outline(vertices, stroke=self.stroke, stroke_weight=self.stroke_weight)
@@ -268,13 +268,13 @@ class Ellipse(BaseShape):
             cy = sin_t * transform + cos_t * cy
 
         if self.fill and self.fill.a > 0:
-            _GLWrapper.color_4f(*self.fill.ratios)
-            _GLWrapper.begin(GL_POLYGON)
+            gl.color_4f(*self.fill.ratios)
+            gl.begin(GL_POLYGON)
 
             for vertex in vertices:
-                _GLWrapper.vertex_2f(*vertex)
+                gl.vertex_2f(*vertex)
 
-            _GLWrapper.end()
+            gl.end()
 
         if self.stroke:
             Line.outline(vertices, stroke=self.stroke, stroke_weight=self.stroke_weight)
