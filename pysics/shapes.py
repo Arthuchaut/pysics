@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 from pysics.types import Color, ByteInt, PIndex, Vertex
-from pysics._wrappers import _GLWrapper, GL_QUADS, GL_LINE_LOOP
+from pysics._wrappers import _GLWrapper, GL_QUADS, GL_LINE_LOOP, GL_LINE
 
 
 class BaseShape(ABC):
@@ -52,6 +52,46 @@ class BaseShape(ABC):
         """The abtract method to render the shape."""
 
         ...
+
+
+class Line(BaseShape):
+    """A line started from x to y coordinates.
+
+    Attributes:
+        x: The x-axis of the shape position.
+        y: The y-axis of the shape position.
+        stroke (Optional): The outline color of the shape. Default to None.
+        stroke_weight (Optional): The outline width of the shape. Default to 1.0.
+    """
+
+    def __init__(
+        self,
+        x: PIndex,
+        y: PIndex,
+        *,
+        stroke: Optional[Color | ByteInt] = None,
+        stroke_weight: Optional[int | float] = 1,
+    ) -> None:
+        """The constructor.
+
+        Args:
+            x: The x-axis of the shape position.
+            y: The y-axis of the shape position.
+            stroke (Optional): The outline color of the shape. Default to None.
+            stroke_weight (Optional): The outline width of the shape. Default to 1.0.
+        """
+
+        super().__init__(x, y, stroke=stroke, stroke_weight=stroke_weight)
+
+    def _render(self) -> None:
+        """Render the line to the window."""
+
+        if self.stroke:
+            _GLWrapper.color_4f(*self.stroke.ratios)
+            _GLWrapper.line_width(self.stroke_weight)
+            _GLWrapper.begin(GL_LINE)
+            _GLWrapper.vertex_2f(self.x, self.y)
+            _GLWrapper.end()
 
 
 class Rect(BaseShape):
