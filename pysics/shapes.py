@@ -89,15 +89,8 @@ class Rect(BaseShape):
             _GLWrapper.color_4f(*self.fill.ratios)
 
         _GLWrapper.begin(GL_QUADS)
-        self._draw_vertices(vertices)
-        _GLWrapper.end()
-
-    def _draw_vertices(self, vertices: list[Vertex]) -> None:
-        """Draw the given vertices.
-
-        Args:
-            vertices: The list of vertex to draw.
-        """
 
         for vertex in vertices:
             _GLWrapper.vertex_2f(*vertex)
+
+        _GLWrapper.end()

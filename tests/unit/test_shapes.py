@@ -117,7 +117,7 @@ class TestRect:
         gl_color_mock: MagicMock = mocker.patch.object(_GLWrapper, "color_4f")
         gl_begin_mock: MagicMock = mocker.patch.object(_GLWrapper, "begin")
         gl_end_mock: MagicMock = mocker.patch.object(_GLWrapper, "end")
-        draw_vertices_mock: MagicMock = mocker.patch.object(Rect, "_draw_vertices")
+        gl_vertex_mock: MagicMock = mocker.patch.object(_GLWrapper, "vertex_2f")
         vertices: list[Vertex] = [(10, 20), (50, 20), (50, 70), (10, 70)]
         initial_state: Any = Rect._render
         mocker.patch.object(Rect, "_render")
@@ -126,19 +126,11 @@ class TestRect:
         shape._render()
         gl_begin_mock.assert_called_once_with(GL_QUADS)
         gl_end_mock.assert_called_once()
-        draw_vertices_mock.assert_called_once_with(vertices)
+
+        for vertex, exp_args in zip(vertices, gl_vertex_mock.call_args_list):
+            assert vertex == exp_args.args
 
         if bg:
             gl_color_mock.assert_called_once_with(*bg.ratios)
         else:
             gl_color_mock.assert_not_called()
-
-    def test_draw_vertices(self, mocker: MockerFixture) -> None:
-        mocker.patch.object(Rect, "_render")
-        gl_vertex_mock: MagicMock = mocker.patch.object(_GLWrapper, "vertex_2f")
-        shape: Rect = Rect(10, 20, 40, 50)
-        vertices: list[Vertex] = [(10, 20), (50, 20), (50, 70), (10, 70)]
-        shape._draw_vertices(vertices)
-
-        for vertex, exp_args in zip(vertices, gl_vertex_mock.call_args_list):
-            assert vertex == exp_args.args
