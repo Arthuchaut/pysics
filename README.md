@@ -4,7 +4,7 @@ A GUI framework for creating some physics simulations.
 
 ## Requirements
 
-- Python >= 3.10
+- Python >= 3.10.5
 - The C++ environment to compile OpenGL
 - (Optional) The C++ environment to compile the OpenGL Accelerator
 

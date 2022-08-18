@@ -189,7 +189,7 @@ class Rect(BaseShape):
         if self.fill:
             gl.color_4f(*self.fill.ratios)
 
-        gl.begin(GL_QUADS)
+        gl.begin(GL_POLYGON)
 
         for vertex in vertices:
             gl.vertex_2f(*vertex)

@@ -161,7 +161,7 @@ class TestRect:
                 vertices, stroke=shape.stroke, stroke_weight=shape.stroke_weight
             )
 
-        gl_begin_mock.assert_called_once_with(GL_QUADS)
+        gl_begin_mock.assert_called_once_with(GL_POLYGON)
         gl_end_mock.assert_called_once()
 
         for vertex, exp_args in zip(vertices, gl_vertex_mock.call_args_list):

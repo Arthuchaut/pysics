@@ -2,4 +2,4 @@ PyOpenGL
 glfw
 
 # Does not work on Mac M1 (cannot find info about that, maybe not ARM compatible or what ever...)
-# PyOpenGL_accelerate
+PyOpenGL_accelerate
